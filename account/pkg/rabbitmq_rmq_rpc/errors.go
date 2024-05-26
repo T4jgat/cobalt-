@@ -1,0 +1,1 @@
+package rabbitmq_rmq_rpc
