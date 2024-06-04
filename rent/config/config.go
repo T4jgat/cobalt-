@@ -1,37 +1,37 @@
 package config
 
-import "github.com/spf13/viper"
+import "os"
 
 type Config struct {
-	Database struct {
-		Host     string
-		Port     int
-		User     string
-		Password string
-		DBName   string
-	}
-	RabbitMQ struct {
-		URL string
-	}
-	JWT struct {
-		Secret string
-	}
+	HTTPPort string
+	Postgres PostgresConfig
+	RabbitMQ RabbitMQConfig
+	LogLevel LogLevelConfig
 }
 
-func LoadConfig() (*Config, error) {
-	var config Config
+type PostgresConfig struct {
+	DSN string
+}
 
-	viper.SetConfigName("config")
-	viper.SetConfigType("yml")
-	viper.AddConfigPath("config/")
+type RabbitMQConfig struct {
+	URL string
+}
 
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
+type LogLevelConfig struct {
+	Level string
+}
+
+func LoadConfig() Config {
+	return Config{
+		HTTPPort: os.Getenv("HTTP_PORT"),
+		Postgres: PostgresConfig{
+			DSN: os.Getenv("POSTGRES_DSN"),
+		},
+		RabbitMQ: RabbitMQConfig{
+			URL: os.Getenv("RABBITMQ_URL"),
+		},
+		LogLevel: LogLevelConfig{
+			Level: os.Getenv("LOG_LEVEL"),
+		},
 	}
-
-	if err := viper.Unmarshal(&config); err != nil {
-		return nil, err
-	}
-
-	return &config, nil
 }

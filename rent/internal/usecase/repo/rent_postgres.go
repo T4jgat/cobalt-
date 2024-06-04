@@ -16,10 +16,10 @@ func New(db *sql.DB) *RentalRepo {
 
 func (r *RentalRepo) Create(rental *entity.Rental) error {
 
-	currentDate := time.Now()
+	currentTime := time.Now()
 
 	_, err := r.db.Exec("INSERT INTO rentals (user_id, car_id, start_date, end_date, status) VALUES ($1, $2, $3, $4, $5)",
-		rental.UserID, rental.CarID, currentDate, currentDate.Add(time.Hour*24), rental.Status)
+		rental.UserID, rental.CarID, currentTime, currentTime.Add(time.Hour*24), rental.Status)
 	return err
 }
 
@@ -42,5 +42,3 @@ func (r *RentalRepo) GetAll() ([]*entity.Rental, error) {
 
 	return rentals, nil
 }
-
-// Additional CRUD methods would go here...

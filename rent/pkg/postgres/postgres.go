@@ -6,8 +6,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func New(cfg config.PG) (*sql.DB, error) {
-	db, err := sql.Open("postgres", cfg.URL)
+func New(cfg config.PostgresConfig) (*sql.DB, error) {
+	db, err := sql.Open("postgres", cfg.DSN)
 	if err != nil {
 		return nil, err
 	}
