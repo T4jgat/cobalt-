@@ -295,3 +295,60 @@ func (user *UserModel) Delete(id int64) error {
 
 	return nil
 }
+
+func (m UserModel) GetAll(role string, sort string) ([]*User, error) {
+	query := `
+		SELECT id, created_at, fname, sname, email, password_hash, user_role, activated, version
+		FROM users`
+
+	args := []interface{}{}
+	if role != "" {
+		query += " WHERE user_role = $1"
+		args = append(args, role)
+	}
+
+	// Determine the sorting order
+	switch sort {
+	case "fname":
+		query += " ORDER BY fname"
+	case "sname":
+		query += " ORDER BY sname"
+	default:
+		query += " ORDER BY id"
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []*User
+	for rows.Next() {
+		var user User
+		err := rows.Scan(
+			&user.ID,
+			&user.CreatedAt,
+			&user.Fname,
+			&user.Sname,
+			&user.Email,
+			&user.Password.hash,
+			&user.UserRole,
+			&user.Activated,
+			&user.Version,
+		)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, &user)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

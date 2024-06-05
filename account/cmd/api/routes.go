@@ -19,6 +19,8 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodPut, "/v1/users/update/:id", app.requirePermission("info:write", app.updateUserHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/users/delete/:id", app.requirePermission("info:write", app.deleteUserHandler))
+	//router.HandleFunc(http.MethodGet, app.getAllUsersHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/users", app.getAllUsersHandler)
 
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 
