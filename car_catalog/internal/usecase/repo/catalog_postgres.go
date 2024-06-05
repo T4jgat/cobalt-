@@ -2,7 +2,9 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/T4jgat/cobalt/internal/entity"
+	"strings"
 )
 
 type CatalogRepo struct {
@@ -20,8 +22,21 @@ func (r *CatalogRepo) Create(car *entity.Catalog) error {
 	return err
 }
 
-func (r *CatalogRepo) GetAll() ([]*entity.Catalog, error) {
-	rows, err := r.db.Query("SELECT id, model, brand, color, price FROM catalog")
+func (r *CatalogRepo) GetAll(filters map[string]string) ([]*entity.Catalog, error) {
+	baseQuery := "SELECT id, model, brand, color, price FROM catalog"
+	var conditions []string
+	var args []interface{}
+
+	for key, value := range filters {
+		conditions = append(conditions, fmt.Sprintf("%s = $%d", key, len(args)+1))
+		args = append(args, value)
+	}
+
+	if len(conditions) > 0 {
+		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
+	}
+
+	rows, err := r.db.Query(baseQuery, args...)
 	if err != nil {
 		return nil, err
 	}
