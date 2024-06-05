@@ -3,9 +3,11 @@ package httpv1
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/T4jgat/cobalt+/helpers"
 	"github.com/T4jgat/cobalt+/internal/entity"
 	"github.com/T4jgat/cobalt+/internal/usecase/repo"
+	"io"
 	"net/http"
 )
 
@@ -146,5 +148,41 @@ func (c *RentalsController) UpdateRentalByID(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
+}
+
+func (*RentalsController) GetRentalsByUserEmail(w http.ResponseWriter, r *http.Request) {
+
+	var email struct {
+		Email string `json:"email"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&email); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	url := "http://localhost:4000/v1/users?email=" + email.Email
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	client := &http.Client{}
+
+	res, err := client.Do(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		// Handle the error appropriately (e.g., return an error response)
+	}
+
+	fmt.Println("Body ----> ", string(body))
 
 }
