@@ -44,7 +44,21 @@ func (c *CatalogsController) CreateCar(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CatalogsController) GetAllCars(w http.ResponseWriter, r *http.Request) {
-	cars, err := c.repo.GetAll()
+	filters := make(map[string]string)
+
+	color := r.URL.Query().Get("color")
+	if color != "" {
+		filters["color"] = color
+	}
+
+	price := r.URL.Query().Get("price")
+	if price != "" {
+		filters["price"] = price
+	}
+
+	sort := r.URL.Query().Get("sort")
+
+	cars, err := c.repo.GetAll(filters, sort)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
