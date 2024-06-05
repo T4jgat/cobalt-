@@ -140,3 +140,12 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 	}
 	return i
 }
+
+func contains(slice []string, value string) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}

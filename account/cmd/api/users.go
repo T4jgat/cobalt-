@@ -56,7 +56,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if user.UserRole == "ADMIN" {
+	if user.UserRole == "ADMIN" || user.UserRole == "OPERATOR" {
 		err = app.models.Permissions.AddForUser(user.ID, "info:write", "info:read")
 		if err != nil {
 			app.serverErrorResponse(w, r, err)
@@ -232,4 +232,55 @@ func (app *application) deleteUserHandler(w http.ResponseWriter, r *http.Request
 		app.serverErrorResponse(w, r, err)
 	}
 
+}
+
+func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Request) {
+	// Get query parameters for role and sort
+	role := r.URL.Query().Get("role")
+	sort := r.URL.Query().Get("sort")
+
+	// Validate sort parameter
+	validSortValues := []string{"fname", "sname"}
+	if sort != "" && !contains(validSortValues, sort) {
+		app.badRequestResponse(w, r, errors.New("invalid sort value"))
+		return
+	}
+
+	users, err := app.models.User.GetAll(role, sort)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"users": users}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) getUserByEmailHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the email from the URL query parameters
+	email := r.URL.Query().Get("email")
+	if email == "" {
+		app.badRequestResponse(w, r, errors.New("email must be provided"))
+		return
+	}
+
+	// Fetch the user by email
+	user, err := app.models.User.GetByEmail(email)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// Respond with the user data
+	err = app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
