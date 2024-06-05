@@ -56,7 +56,9 @@ func (c *CatalogsController) GetAllCars(w http.ResponseWriter, r *http.Request) 
 		filters["price"] = price
 	}
 
-	cars, err := c.repo.GetAll(filters)
+	sort := r.URL.Query().Get("sort")
+
+	cars, err := c.repo.GetAll(filters, sort)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

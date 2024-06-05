@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/T4jgat/cobalt/internal/entity"
-	"strings"
 )
 
 type CatalogRepo struct {
@@ -22,21 +21,28 @@ func (r *CatalogRepo) Create(car *entity.Catalog) error {
 	return err
 }
 
-func (r *CatalogRepo) GetAll(filters map[string]string) ([]*entity.Catalog, error) {
-	baseQuery := "SELECT id, model, brand, color, price FROM catalog"
-	var conditions []string
-	var args []interface{}
+func (r *CatalogRepo) GetAll(filters map[string]string, sort string) ([]*entity.Catalog, error) {
+	query := "SELECT id, model, brand, color, price FROM catalog WHERE 1=1"
+	args := []interface{}{}
+	argID := 1
 
-	for key, value := range filters {
-		conditions = append(conditions, fmt.Sprintf("%s = $%d", key, len(args)+1))
-		args = append(args, value)
+	if color, ok := filters["color"]; ok {
+		query += fmt.Sprintf(" AND color = $%d", argID)
+		args = append(args, color)
+		argID++
 	}
 
-	if len(conditions) > 0 {
-		baseQuery += " WHERE " + strings.Join(conditions, " AND ")
+	if price, ok := filters["price"]; ok {
+		query += fmt.Sprintf(" AND price = $%d", argID)
+		args = append(args, price)
+		argID++
 	}
 
-	rows, err := r.db.Query(baseQuery, args...)
+	if sort != "" {
+		query += " ORDER BY " + sort
+	}
+
+	rows, err := r.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
