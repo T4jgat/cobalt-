@@ -257,3 +257,30 @@ func (app *application) getAllUsersHandler(w http.ResponseWriter, r *http.Reques
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
+func (app *application) getUserByEmailHandler(w http.ResponseWriter, r *http.Request) {
+	// Get the email from the URL query parameters
+	email := r.URL.Query().Get("email")
+	if email == "" {
+		app.badRequestResponse(w, r, errors.New("email must be provided"))
+		return
+	}
+
+	// Fetch the user by email
+	user, err := app.models.User.GetByEmail(email)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// Respond with the user data
+	err = app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
