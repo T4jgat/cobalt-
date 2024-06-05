@@ -57,13 +57,13 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 
 	if user.UserRole == "ADMIN" {
-		err = app.models.Permissions.AddForUser(user.ID, "moduleinfo:write", "moduleinfo:read")
+		err = app.models.Permissions.AddForUser(user.ID, "info:write", "info:read")
 		if err != nil {
 			app.serverErrorResponse(w, r, err)
 			return
 		}
 	} else {
-		err = app.models.Permissions.AddForUser(user.ID, "moduleinfo:read")
+		err = app.models.Permissions.AddForUser(user.ID, "info:read")
 		if err != nil {
 			app.serverErrorResponse(w, r, err)
 			return
