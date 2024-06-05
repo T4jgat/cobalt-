@@ -2,6 +2,7 @@ package repo
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/T4jgat/cobalt/internal/entity"
 )
 
@@ -20,8 +21,28 @@ func (r *CatalogRepo) Create(car *entity.Catalog) error {
 	return err
 }
 
-func (r *CatalogRepo) GetAll() ([]*entity.Catalog, error) {
-	rows, err := r.db.Query("SELECT id, model, brand, color, price FROM catalog")
+func (r *CatalogRepo) GetAll(filters map[string]string, sort string) ([]*entity.Catalog, error) {
+	query := "SELECT id, model, brand, color, price FROM catalog WHERE 1=1"
+	args := []interface{}{}
+	argID := 1
+
+	if color, ok := filters["color"]; ok {
+		query += fmt.Sprintf(" AND color = $%d", argID)
+		args = append(args, color)
+		argID++
+	}
+
+	if price, ok := filters["price"]; ok {
+		query += fmt.Sprintf(" AND price = $%d", argID)
+		args = append(args, price)
+		argID++
+	}
+
+	if sort != "" {
+		query += " ORDER BY " + sort
+	}
+
+	rows, err := r.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
