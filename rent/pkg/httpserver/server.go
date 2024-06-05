@@ -3,16 +3,18 @@ package httpserver
 import (
 	"github.com/T4jgat/cobalt+/internal/controller/httpv1"
 	"github.com/T4jgat/cobalt+/pkg/logger"
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
 
 func New(rentalsController *httpv1.RentalsController, log logger.Logger) http.Handler {
-	r := mux.NewRouter()
+	r := httprouter.New()
 
-	r.HandleFunc("/rentals", rentalsController.CreateRental).Methods(http.MethodPost)
-	r.HandleFunc("/rentals", rentalsController.GetAllRentals).Methods(http.MethodGet)
-	// Add other endpoints here...
+	r.HandlerFunc(http.MethodGet, "/rentals", rentalsController.GetAllRentals)
+	r.HandlerFunc(http.MethodPost, "/rentals", rentalsController.CreateRental)
+	r.HandlerFunc(http.MethodGet, "/rentals/:id", rentalsController.GetRentalByID)
+	r.HandlerFunc(http.MethodDelete, "/rentals/:id", rentalsController.DeleteRentalByID)
+	r.HandlerFunc(http.MethodPut, "/rentals/:id", rentalsController.UpdateRentalByID)
 
 	return r
 }

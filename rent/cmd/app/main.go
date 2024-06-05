@@ -32,6 +32,7 @@ func main() {
 
 	rabbitMQ, err := server.New(cfg.RabbitMQ)
 	if err != nil {
+		fmt.Println("RABBIT URL: ", cfg.RabbitMQ)
 		log.Fatal("failed to connect to RabbitMQ", err)
 	}
 

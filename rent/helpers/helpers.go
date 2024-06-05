@@ -13,10 +13,10 @@ import (
 
 type envelope map[string]any
 
-func readIDPAram(r *http.Request) (int64, error) {
+func ReadIDPAram(r *http.Request) (int, error) {
 	params := httprouter.ParamsFromContext(r.Context())
 
-	id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
+	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
 		return 0, errors.New("invalid id parameter")
 	}
@@ -44,7 +44,7 @@ func WriteJSON(write http.ResponseWriter, status int, data any, headers http.Hea
 	return nil
 }
 
-func readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
+func ReadJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 
 	maxBytes := 1_048_576
 	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
