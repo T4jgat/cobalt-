@@ -3,7 +3,9 @@ package repo
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/T4jgat/cobalt+/internal/entity"
+	"strings"
 	"time"
 )
 
@@ -24,25 +26,26 @@ func (r *RentalRepo) Create(rental *entity.Rental) error {
 	return err
 }
 
-func (r *RentalRepo) GetAll() ([]*entity.Rental, error) {
-	rows, err := r.db.Query("SELECT id, user_id, car_id, start_date, end_date, status FROM rentals")
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	rentals := []*entity.Rental{}
-	for rows.Next() {
-		rental := &entity.Rental{}
-		err := rows.Scan(&rental.ID, &rental.UserID, &rental.CarID, &rental.StartDate, &rental.EndDate, &rental.Status)
-		if err != nil {
-			return nil, err
-		}
-		rentals = append(rentals, rental)
-	}
-
-	return rentals, nil
-}
+//
+//func (r *RentalRepo) GetAll() ([]*entity.Rental, error) {
+//	rows, err := r.db.Query("SELECT id, user_id, car_id, start_date, end_date, status FROM rentals")
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer rows.Close()
+//
+//	rentals := []*entity.Rental{}
+//	for rows.Next() {
+//		rental := &entity.Rental{}
+//		err := rows.Scan(&rental.ID, &rental.UserID, &rental.CarID, &rental.StartDate, &rental.EndDate, &rental.Status)
+//		if err != nil {
+//			return nil, err
+//		}
+//		rentals = append(rentals, rental)
+//	}
+//
+//	return rentals, nil
+//}
 
 func (r *RentalRepo) GetByID(id int) (*entity.Rental, error) {
 
@@ -151,4 +154,41 @@ func (r *RentalRepo) UpdateStatus(id int, status string) error {
 		}
 	}
 	return nil
+}
+
+func (r *RentalRepo) GetAll(filters map[string]string, sort string) ([]*entity.Rental, error) {
+	var queryBuilder strings.Builder
+	queryBuilder.WriteString("SELECT id, user_id, car_id, start_date, end_date, status FROM rentals WHERE 1=1")
+
+	args := []any{}
+	argID := 1
+
+	for key, value := range filters {
+		queryBuilder.WriteString(fmt.Sprintf(" AND %s = $%d", key, argID))
+		args = append(args, value)
+		argID++
+	}
+
+	if sort != "" {
+		queryBuilder.WriteString(" ORDER BY " + sort)
+	}
+
+	query := queryBuilder.String()
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	rentals := []*entity.Rental{}
+	for rows.Next() {
+		rental := &entity.Rental{}
+		err := rows.Scan(&rental.ID, &rental.UserID, &rental.CarID, &rental.StartDate, &rental.EndDate, &rental.Status)
+		if err != nil {
+			return nil, err
+		}
+		rentals = append(rentals, rental)
+	}
+
+	return rentals, nil
 }
