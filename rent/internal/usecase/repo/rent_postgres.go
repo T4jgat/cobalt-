@@ -20,7 +20,7 @@ func (r *RentalRepo) Create(rental *entity.Rental) error {
 	currentTime := time.Now()
 
 	_, err := r.db.Exec("INSERT INTO rentals (user_id, car_id, start_date, end_date, status) VALUES ($1, $2, $3, $4, $5)",
-		rental.UserID, rental.CarID, currentTime, currentTime.Add(time.Hour*24), rental.Status)
+		rental.UserID, rental.CarID, currentTime, currentTime.Add(time.Hour*24), "PENDING")
 	return err
 }
 
@@ -115,6 +115,33 @@ func (r *RentalRepo) Update(rental *entity.Rental) error {
 	}
 
 	err := r.db.QueryRow(query, args...).Scan(&rental.ID)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return nil
+		}
+	}
+	return nil
+}
+
+func (r *RentalRepo) CreateRental(id int) {} // TODO implement
+
+func (r *RentalRepo) UpdateStatus(id int, status string) error {
+	query := `
+		UPDATE rentals
+		SET status = $1
+		WHERE id = $2
+		RETURNING id
+		`
+
+	args := []any{
+		status,
+		id,
+	}
+
+	err := r.db.QueryRow(query, args...).Scan(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):

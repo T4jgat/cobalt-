@@ -279,7 +279,7 @@ func (app *application) getUserByEmailHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	// Respond with the user data
-	err = app.writeJSON(w, http.StatusOK, envelope{"user": user}, nil)
+	err = app.writeJSON(w, http.StatusOK, user, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}

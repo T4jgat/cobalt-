@@ -1,1 +1,4 @@
 /.idea
+/car_catalog/.env
+/rent/.env
+/account/.env

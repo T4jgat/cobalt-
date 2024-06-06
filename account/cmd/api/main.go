@@ -5,11 +5,8 @@ import (
 	"baha.account/internal/mailer"
 	"context"
 	"database/sql"
-	"errors"
 	"flag"
 	"fmt"
-	"github.com/golang-migrate/migrate"
-	"github.com/golang-migrate/migrate/database/postgres"
 	_ "github.com/golang-migrate/migrate/source/file"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -67,7 +64,7 @@ func main() {
 
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("POSTGRES_DSN"), "PostgreSQL DSN")
 
-	flag.StringVar(&cfg.smtp.host, "smtp-host", "smtp-mail.outlook.com", "SMTP host")
+	flag.StringVar(&cfg.smtp.host, "smtp-host", os.Getenv("SMTP_HOST"), "SMTP host")
 	flag.IntVar(&cfg.smtp.port, "smtp-port", 25, "SMTP port")
 	flag.StringVar(&cfg.smtp.username, "smtp-username", os.Getenv("EMAIL"), "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", os.Getenv("EMAIL_PASSWORD"), "SMTP password")
@@ -88,27 +85,27 @@ func main() {
 
 	logger.Printf("database connection pool established")
 
-	migrationDriver, err := postgres.WithInstance(db, &postgres.Config{})
-	if err != nil {
-		logger.Fatal(err, nil)
-	}
-
-	migrator, err := migrate.NewWithDatabaseInstance(
-		"file://C:/Users/baqti/OneDrive/Desktop/adv-prog-assign-1/migrations",
-		"postgres",
-		migrationDriver,
-		//C:/Users/baqti/OneDrive/Desktop/adv-prog-assign-1/migrations
-	)
-	if err != nil {
-		logger.Fatal(err, nil)
-	}
-
-	err = migrator.Up()
-	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		logger.Fatal(err, nil)
-	}
-
-	logger.Printf("database migrations applied")
+	//migrationDriver, err := postgres.WithInstance(db, &postgres.Config{})
+	//if err != nil {
+	//	logger.Fatal(err, nil)
+	//}
+	//
+	//migrator, err := migrate.NewWithDatabaseInstance(
+	//	"file://C:/Users/baqti/OneDrive/Desktop/adv-prog-assign-1/migrations",
+	//	"postgres",
+	//	migrationDriver,
+	//	//C:/Users/baqti/OneDrive/Desktop/adv-prog-assign-1/migrations
+	//)
+	//if err != nil {
+	//	logger.Fatal(err, nil)
+	//}
+	//
+	//err = migrator.Up()
+	//if err != nil && !errors.Is(err, migrate.ErrNoChange) {
+	//	logger.Fatal(err, nil)
+	//}
+	//
+	//logger.Printf("database migrations applied")
 
 	// application instance
 	app := &application{
