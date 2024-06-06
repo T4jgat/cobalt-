@@ -162,6 +162,7 @@ func (m UserModel) GetByEmail(email string) (*User, error) {
 		SELECT id, created_at, fname, sname, email, password_hash, user_role, activated, version
 		FROM users
 		WHERE email = $1
+		LIMIT 1
 		`
 
 	var user User
