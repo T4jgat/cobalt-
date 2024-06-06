@@ -85,3 +85,23 @@ func (r *CatalogRepo) Delete(id int) error {
 	_, err := r.db.Exec("DELETE FROM catalog WHERE id = $1", id)
 	return err
 }
+
+func (r *CatalogRepo) GetByModel(model string) ([]*entity.Catalog, error) {
+	rows, err := r.db.Query("SELECT id, model, brand, color, price FROM catalog WHERE model = $1", model)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	cars := []*entity.Catalog{}
+	for rows.Next() {
+		car := &entity.Catalog{}
+		err := rows.Scan(&car.ID, &car.Model, &car.Brand, &car.Color, &car.Price)
+		if err != nil {
+			return nil, err
+		}
+		cars = append(cars, car)
+	}
+
+	return cars, nil
+}
