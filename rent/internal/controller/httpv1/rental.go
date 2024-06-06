@@ -47,7 +47,16 @@ func (c *RentalsController) CreateRental(w http.ResponseWriter, r *http.Request)
 }
 
 func (c *RentalsController) GetAllRentals(w http.ResponseWriter, r *http.Request) {
-	rentals, err := c.repo.GetAll()
+	filters := make(map[string]string)
+	for key, values := range r.URL.Query() {
+		if len(values) > 0 && key != "sort" {
+			filters[key] = values[0]
+		}
+	}
+
+	sort := r.URL.Query().Get("sort")
+
+	rentals, err := c.repo.GetAll(filters, sort)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -56,9 +65,7 @@ func (c *RentalsController) GetAllRentals(w http.ResponseWriter, r *http.Request
 	err = helpers.WriteJSON(w, http.StatusOK, envelope{"rentals": rentals}, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-
 	}
-
 }
 
 func (c *RentalsController) GetRentalByID(w http.ResponseWriter, r *http.Request) {
