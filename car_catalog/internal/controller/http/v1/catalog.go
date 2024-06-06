@@ -142,3 +142,22 @@ func (c *CatalogsController) DeleteCar(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+func (c *CatalogsController) GetCarsByModel(w http.ResponseWriter, r *http.Request) {
+	model := r.URL.Query().Get("model")
+	if model == "" {
+		http.Error(w, "Model parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	cars, err := c.repo.GetByModel(model)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = helpers.WriteJSON(w, http.StatusOK, envelope{"cars": cars}, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
