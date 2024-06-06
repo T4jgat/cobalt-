@@ -17,6 +17,7 @@ func New(rentalsController *httpv1.RentalsController, log logger.Logger) http.Ha
 	r.HandlerFunc(http.MethodPut, "/rentals/:id", rentalsController.UpdateRentalByID)
 
 	r.HandlerFunc(http.MethodPost, "/rentals/user-rentals", rentalsController.GetRentalsByUserEmail)
+	r.HandlerFunc(http.MethodPut, "/rentals/:id/updatestatus", rentalsController.UpdateRentalStatus)
 
 	return r
 }
